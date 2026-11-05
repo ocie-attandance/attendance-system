@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#123c69">
+    <link rel="manifest" href="./manifest.json">
+    <title>Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(function () {
+                console.log("PWA Service Worker imesajiliwa.");
+            })
+            .catch(function (error) {
+                console.error("Service Worker error:", error);
+            });
+    });
+}
+</script>
+
+      <!-- =========================
+         LOGIN
+    ========================== -->
+
+    <div
+        class="login-container"
+        id="loginContainer"
+    >
+
+        <div class="login-box">
+
+            <h1>ATTENDANCE SYSTEM</h1>
+
+            <p>Ingia kwenye mfumo</p>
+
+            <form id="loginForm">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Weka email yako"
+                    required
+                >
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Weka password yako"
+                    required
+                >
+
+                <button type="submit">
+                    LOGIN
+                </button>
+
+                <p id="message"></p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         DASHBOARD
+    ========================== -->
+
+    <div
+        class="dashboard"
+        id="dashboard"
+        style="display: none;"
+    >
+
+        <h1>ATTENDANCE SYSTEM</h1>
+
+        <h2 id="welcome">
+            Karibu
+        </h2>
+
+        <p id="attendanceMessage"></p>
+
+        <div class="attendance-buttons">
+
+            <button
+                id="checkInBtn"
+                type="button"
+            >
+                CHECK IN
+            </button>
+
+            <button
+                id="checkOutBtn"
+                type="button"
+                style="display: none;"
+            >
+                CHECK OUT
+            </button>
+
+        </div>
+
+        <br>
+
+        <button
+            id="logoutBtn"
+            type="button"
+        >
+            LOGOUT
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         SUPABASE
+    ========================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <!-- =========================
+         APP JAVASCRIPT
+    ========================== -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

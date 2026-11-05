@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+
+<html lang="sw">
+
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#123c69">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+    <meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+<title>Admin Dashboard</title>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+    }
+
+    .header {
+        background: #1f2937;
+        color: white;
+        padding: 20px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .header p {
+        margin: 6px 0 0;
+        opacity: 0.8;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .today {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .today strong {
+        font-size: 18px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .card-number {
+        font-size: 30px;
+        font-weight: bold;
+        margin-top: 8px;
+    }
+
+    .table-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    .table-container h2 {
+        margin-top: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    th,
+    td {
+        border-bottom: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    th {
+        background: #f8f9fa;
+    }
+
+    .present {
+        font-weight: bold;
+    }
+
+    .out {
+        font-weight: bold;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 25px;
+        color: #777;
+    }
+
+    @media (max-width: 700px) {
+
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        .container {
+            padding: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+    }
+
+</style>
+
+</head>
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(function () {
+                console.log("PWA Service Worker imesajiliwa.");
+            })
+            .catch(function (error) {
+                console.error("Service Worker error:", error);
+            });
+    });
+}
+</script>
+
+<body>
+
+<div class="header">
+
+    <h1>ATTENDANCE SYSTEM</h1>
+
+    <p>Admin Dashboard</p>
+<button id="adminLogoutBtn" type="button">
+    LOGOUT
+</button>
+</div>
+
+
+<div class="container">
+
+
+    <!-- TODAY -->
+<div class="today">
+
+    📅 <strong>Attendance ya Leo</strong>
+
+    <div id="todayDate"></div>
+
+    <br>
+
+    <label for="attendanceDate">
+        Chagua Tarehe:
+    </label>
+
+    <input
+        type="date"
+        id="attendanceDate"
+    >
+
+    <button
+    type="button"
+    id="searchDateBtn"
+>
+    🔍 TAFUTA
+</button>
+
+<button
+    type="button"
+    id="todayBtn"
+>
+    ↩️ LEO
+</button>
+
+</div>
+
+    <!-- SUMMARY -->
+
+    <div class="cards">
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Jumla ya Records Leo
+            </div>
+
+            <div
+                class="card-number"
+                id="totalRecords"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Waliopo Kazini
+            </div>
+
+            <div
+                class="card-number"
+                id="currentlyIn"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-title">
+                Waliomaliza
+            </div>
+
+            <div
+                class="card-number"
+                id="currentlyOut"
+            >
+                0
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <p id="message">
+        Inapakia attendance...
+    </p>
+    <!-- TABLE -->
+
+    <div class="table-container">
+
+        <h2>Attendance ya Leo</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>MFANYAKAZI</th>
+
+                    <th>CHECK IN</th>
+
+                    <th>CHECK OUT</th>
+
+                    <th>STATUS</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="attendanceTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+    <!-- =========================
+     EMPLOYEES
+     ========================= -->
+
+<div class="table-container">
+
+    <!-- =========================
+         ADD EMPLOYEE
+         ========================= -->
+
+    <h2>➕ Ongeza Mfanyakazi</h2>
+
+    <div class="add-employee-box">
+
+        <h3>➕ Sajili Mfanyakazi Mpya</h3>
+
+        <input
+            type="text"
+            id="newEmployeeName"
+            placeholder="Jina kamili la mfanyakazi"
+        >
+
+        <input
+            type="text"
+            id="newEmployeePhone"
+            placeholder="Namba ya simu"
+        >
+
+        <input
+            type="text"
+            id="newEmployeeCode"
+            placeholder="Employee Code mfano EMP004"
+        >
+
+        <input
+            type="email"
+            id="newEmployeeEmail"
+            placeholder="Email ya ku-login"
+        >
+
+        <input
+            type="password"
+            id="newEmployeePassword"
+            placeholder="Password ya ku-login"
+        >
+
+        <button
+            type="button"
+            id="addEmployeeBtn"
+        >
+            ➕ SAJILI MFANYAKAZI
+        </button>
+
+        <p id="addEmployeeMessage"></p>
+
+    </div>
+
+
+    <!-- =========================
+         EMPLOYEE LIST
+         ========================= -->
+
+    <h2>👥 Wafanyakazi</h2>
+
+    <div class="employee-search">
+
+        <input
+            type="text"
+            id="employeeSearch"
+            placeholder="🔍 Tafuta mfanyakazi..."
+        >
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>MFANYAKAZI</th>
+                <th>EMPLOYEE CODE</th>
+                <th>SIMU</th>
+                <th>EMAIL</th>
+                <th>ATTENDANCE</th>
+                <th>EDIT / FUTA</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="employeesTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+<!-- =========================
+     EDIT EMPLOYEE
+     ========================= -->
+<div
+    id="editEmployeeBox"
+    class="table-container"
+    style="display: none;"
+>
+
+    <h2>✏️ Hariri Mfanyakazi</h2>
+
+    <input
+        type="hidden"
+        id="editEmployeeId"
+    >
+
+    <label>Jina kamili</label>
+    <input
+        type="text"
+        id="editEmployeeName"
+        placeholder="Jina kamili"
+    >
+
+    <label>Namba ya simu</label>
+    <input
+        type="text"
+        id="editEmployeePhone"
+        placeholder="Namba ya simu"
+    >
+
+    <label>Employee Code</label>
+    <input
+        type="text"
+        id="editEmployeeCode"
+        placeholder="Employee Code"
+    >
+
+    <label>Email ya kuingia kwenye mfumo</label>
+    <input
+        type="email"
+        id="editEmployeeEmail"
+        placeholder="Email ya mfanyakazi"
+    >
+
+    <label>Role</label>
+    <select id="editEmployeeRole">
+        <option value="employee">Mfanyakazi</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <br><br>
+
+    <button
+        type="button"
+        id="saveEmployeeEditBtn"
+    >
+        💾 HIFADHI MABADILIKO
+    </button>
+
+    <button
+        type="button"
+        id="cancelEmployeeEditBtn"
+    >
+        ❌ GHAIRISHA
+    </button>
+
+    <p id="editEmployeeMessage"></p>
+
+</div>
+<!-- =========================
+     EMPLOYEE ATTENDANCE DETAILS
+========================= -->
+
+<div
+    class="table-container"
+    id="employeeAttendanceDetails"
+    style="display: none;"
+>
+
+    <h2>📋 Attendance ya Mfanyakazi</h2>
+
+    <p id="selectedEmployeeName"></p>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>TAREHE</th>
+                <th>MFANYAKAZI</th>
+                <th>CHECK IN</th>
+                <th>CHECK OUT</th>
+                <th>MUDA</th>
+                <th>STATUS</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="employeeAttendanceTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- =========================
+     MONTHLY REPORT
+========================= -->
+
+<div class="table-container">
+
+<h2>📊 Ripoti ya Mwezi</h2>
+
+<div style="margin-bottom: 20px;">
+
+    <label for="reportMonth">
+        Chagua Mwezi:
+    </label>
+    <input
+        type="month"
+        id="reportMonth"
+    >
+    <button
+        type="button"
+        id="searchMonthBtn"
+    >
+        🔍 TAFUTA
+    </button>
+    <button
+    type="button"
+    id="printMonthlyBtn"
+>
+    🖨️ PRINT RIPOTI
+</button>
+
+</div>
+
+<p id="monthlyMessage">
+    Chagua mwezi kuona ripoti.
+</p>
+<table>
+
+    <thead>
+
+        <tr>
+    <th>TAREHE</th>
+    <th>MFANYAKAZI</th>
+    <th>CHECK IN</th>
+    <th>CHECK OUT</th>
+    <th>MUDA</th>
+    <th>STATUS</th>
+</tr>
+
+    </thead>
+
+    <tbody id="monthlyDetailsTable">
+
+    </tbody>
+
+</table>
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>MFANYAKAZI</th>
+
+            <th>SIKU ALIZOINGIA</th>
+
+            <th>SIKU ALIZOMALIZA</th>
+
+            <th>RECORDS</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody id="monthlyTable">
+
+    </tbody>
+
+</table>
+
+</div>
+
+
+<!-- SUPABASE FIRST -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="admin.js?v=2"></script>
+
+</body>
+
+</html>
